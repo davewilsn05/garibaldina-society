@@ -102,3 +102,81 @@ if (!reduceMotion) {
 
 const year = document.querySelector("[data-year]");
 if (year) year.textContent = String(new Date().getFullYear());
+
+const carousel = document.querySelector("[data-carousel]");
+
+if (carousel) {
+  const viewport = carousel.querySelector("[data-carousel-viewport]");
+  const track = carousel.querySelector(".instagram-track");
+  const slides = Array.from(carousel.querySelectorAll("[data-carousel-slide]"));
+  const previousButton = carousel.querySelector("[data-carousel-previous]");
+  const nextButton = carousel.querySelector("[data-carousel-next]");
+  const currentLabel = carousel.querySelector("[data-carousel-current]");
+  const totalLabel = carousel.querySelector("[data-carousel-total]");
+  const progressBar = carousel.querySelector("[data-carousel-progress]");
+  let activeIndex = 0;
+  let carouselFrame;
+
+  const formatSlideNumber = (value) => String(value).padStart(2, "0");
+
+  const getNearestSlideIndex = () => {
+    if (!viewport || !track || !slides.length) return 0;
+    const trackPadding = Number.parseFloat(getComputedStyle(track).paddingLeft) || 0;
+
+    return slides.reduce(
+      (nearest, slide, index) => {
+        const targetLeft = slide.offsetLeft - track.offsetLeft - trackPadding;
+        const distance = Math.abs(targetLeft - viewport.scrollLeft);
+        return distance < nearest.distance ? { index, distance } : nearest;
+      },
+      { index: 0, distance: Number.POSITIVE_INFINITY },
+    ).index;
+  };
+
+  const updateCarousel = (index) => {
+    activeIndex = Math.max(0, Math.min(index, slides.length - 1));
+    if (currentLabel) currentLabel.textContent = formatSlideNumber(activeIndex + 1);
+    if (totalLabel) totalLabel.textContent = formatSlideNumber(slides.length);
+    if (progressBar) {
+      progressBar.style.transform = `scaleX(${(activeIndex + 1) / slides.length})`;
+    }
+    const maxScroll = viewport ? viewport.scrollWidth - viewport.clientWidth : 0;
+    if (previousButton) previousButton.disabled = !viewport || viewport.scrollLeft <= 1;
+    if (nextButton) nextButton.disabled = !viewport || viewport.scrollLeft >= maxScroll - 1;
+  };
+
+  const scrollToSlide = (index) => {
+    if (!viewport || !track || !slides.length) return;
+    const nextIndex = Math.max(0, Math.min(index, slides.length - 1));
+    const trackPadding = Number.parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    const targetLeft = slides[nextIndex].offsetLeft - track.offsetLeft - trackPadding;
+    viewport.scrollTo({ left: targetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+    updateCarousel(nextIndex);
+  };
+
+  previousButton?.addEventListener("click", () => scrollToSlide(activeIndex - 1));
+  nextButton?.addEventListener("click", () => scrollToSlide(activeIndex + 1));
+
+  viewport?.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    scrollToSlide(activeIndex + (event.key === "ArrowRight" ? 1 : -1));
+  });
+
+  viewport?.addEventListener(
+    "scroll",
+    () => {
+      if (carouselFrame) window.cancelAnimationFrame(carouselFrame);
+      carouselFrame = window.requestAnimationFrame(() => {
+        updateCarousel(getNearestSlideIndex());
+      });
+    },
+    { passive: true },
+  );
+
+  window.addEventListener("resize", () => {
+    updateCarousel(getNearestSlideIndex());
+  });
+
+  updateCarousel(0);
+}

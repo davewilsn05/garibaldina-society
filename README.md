@@ -13,6 +13,16 @@ A self-contained static redesign built from the Society's authentic website arch
 - `assets/` — curated local Society photography, branding, and type
 - `vercel.json` — Vercel deployment and security-header configuration
 
+## Instagram carousel
+
+The near-footer carousel uses optimized, locally hosted Society photography and links every card to
+[`@garibaldinasociety`](https://www.instagram.com/garibaldinasociety/?hl=en). It is intentionally curated
+rather than fetched in the browser: Instagram profile feeds require an authenticated server-side API or a
+third-party widget, and temporary image URLs are not reliable site assets.
+
+To refresh the carousel, replace `assets/instagram-01.webp` through `assets/instagram-08.webp` and update the
+corresponding alt text in `index.html`.
+
 ## Preview locally
 
 Double-click `serve-redesign.command`, or run:
