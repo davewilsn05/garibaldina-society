@@ -2,6 +2,9 @@
 
 A self-contained static redesign built from the Society's authentic website archive and the Garibaldina tenant assets in CommonCircle.
 
+- Live site: <https://garibaldina-society.vercel.app/>
+- GitHub: <https://github.com/davewilsn05/garibaldina-society>
+
 ## Project structure
 
 - `index.html` — semantic one-page site
